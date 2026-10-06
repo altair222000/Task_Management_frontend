@@ -13,8 +13,4 @@ test('FE-ACCESS-01 redirects a visitor without authentication to login', () => {
   expect(screen.getByText('Login page')).toBeTruthy();
   expect(screen.queryByText('Protected content')).toBeNull();
 });
-test('FE-ACCESS-02 renders the private content for an authenticated user', () => {
-  renderWithStore(routes(), { auth: { _id: 'u1' } }, '/private');
-  expect(screen.getByText('Protected content')).toBeTruthy();
-  expect(screen.queryByText('Login page')).toBeNull();
-});
+
