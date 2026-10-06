@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "baselineCommit": "3cb577ec6bc9a80c7f8326f16195afa33f237051",
+  "originalTests": 0,
+  "metric": "lines",
+  "method": "Retrospective instrumentation of source archived from the pinned Git commit; probe is not an application test.",
+  "recordedAt": "2026-10-06T00:45:41.059Z",
+  "files": {
+    "src/components/Model.jsx": {
+      "total": 544,
+      "covered": 0,
+      "pct": 0,
+      "sha256": "6cf163b47489c678a9b80906e5219eb1689e3fa7df0661fe6c9ba47460e0f49e"
+    },
+    "src/components/PrivateRoute.jsx": {
+      "total": 10,
+      "covered": 0,
+      "pct": 0,
+      "sha256": "016aab04902ae02d5781fcc1975fd9633b542124b022a575c9da168d00de5797"
+    },
+    "src/components/TaskBox.jsx": {
+      "total": 148,
+      "covered": 0,
+      "pct": 0,
+      "sha256": "759c731b26f83af4a2cec86af43fd52a1b21d9f5a5690f5d2372c9b1a0d2d381"
+    },
+    "src/hooks/useAddTask.js": {
+      "total": 48,
+      "covered": 0,
+      "pct": 0,
+      "sha256": "1a6fb3d49f6a0c2085d9746aa4aa192d27e3176b62dc50674a23ea9b96986893"
+    },
+    "src/hooks/useAddToBoard.js": {
+      "total": 36,
+      "covered": 0,
+      "pct": 0,
+      "sha256": "08cbe71b2143a5a84513d4b8bf76c29d68c8287220d397cb6dbc8a4825962d72"
+    },
+    "src/hooks/useAllTask.js": {
+      "total": 35,
+      "covered": 0,
+      "pct": 0,
+      "sha256": "d2cf4cc11dc8cff431cbd2e5498f933c0b1b85be8db4045f5eef0b7d4dcd4718"
+    },
+    "src/hooks/useAllTaskFilter.js": {
+      "total": 27,
+      "covered": 0,
+      "pct": 0,
+      "sha256": "5813c0e6bb8609bef3a2fa8ee05bb65be440e061151c10a34d2508760a544cf1"
+    },
+    "src/hooks/useDeleteTask.js": {
+      "total": 39,
+      "covered": 0,
+      "pct": 0,
+      "sha256": "fde1d01f9835e5b9e5f15a23236fbaa7b0a7d2148b078d88a5659194baa7cc7d"
+    },
+    "src/hooks/useGetTask.js": {
+      "total": 27,
+      "covered": 0,
+      "pct": 0,
+      "sha256": "0211458986455a70a0be8b6cfb45ba4be2bf96360e0ff8a479e84b726a975d61"
+    },
+    "src/hooks/useUpdateCategory.js": {
+      "total": 59,
+      "covered": 0,
+      "pct": 0,
+      "sha256": "b7c701328003b960848bbecb11c64150b2ff27af054f23ee8f51a9549360ed51"
+    },
+    "src/hooks/useUpdateTask.js": {
+      "total": 67,
+      "covered": 0,
+      "pct": 0,
+      "sha256": "a3d517bd0d773913ae1ec42c26d6efb085d7765d61c5663a633d796d90a7e415"
+    },
+    "src/pages/Register_Login.jsx": {
+      "total": 240,
+      "covered": 0,
+      "pct": 0,
+      "sha256": "b95fd69acdb2db28095b3254381fb1fdd3b71f266c7d1048e328d39cdf7c5cff"
+    },
+    "src/redux/slices/authSlice.js": {
+      "total": 15,
+      "covered": 0,
+      "pct": 0,
+      "sha256": "6a9d10ddb5cf8b9bfa2364e7eae0d6dfd1d575234321e36deca246bf0a30b619"
+    },
+    "src/redux/slices/stateSlice.js": {
+      "total": 81,
+      "covered": 0,
+      "pct": 0,
+      "sha256": "17bb1da1eb2b030521a9f22a69ba5912f94dd114ae69827045d04b6ff7ea7b0b"
+    },
+    "src/redux/slices/taskSlice.js": {
+      "total": 91,
+      "covered": 0,
+      "pct": 0,
+      "sha256": "c6fac940c8c8c9cf5b9e9a31eda571c69b6e978b432cfef8a4690b1c9177a247"
+    },
+    "src/utils/generateDate.js": {
+      "total": 19,
+      "covered": 0,
+      "pct": 0,
+      "sha256": "19f46ed690bcd1a151b7eccbeb63591ade5972bbe2f2dbd5381c95191028ccfd"
+    },
+    "src/utils/header.js": {
+      "total": 9,
+      "covered": 0,
+      "pct": 0,
+      "sha256": "a29102e544325d1569a655d83cc7c13dac35d61aed1faea7b618819335ce7057"
+    },
+    "src/utils/validate.js": {
+      "total": 34,
+      "covered": 0,
+      "pct": 0,
+      "sha256": "031704014c8fffb6101e418971084846e8ad3902e8ac900576a246215dd26ecb"
+    }
+  }
+}

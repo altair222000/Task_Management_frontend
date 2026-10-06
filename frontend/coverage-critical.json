@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "baselineCommit": "3cb577ec6bc9a80c7f8326f16195afa33f237051",
+  "baselineOriginalTests": 0,
+  "metric": "lines",
+  "minimumDeltaPoints": 20,
+  "minimumTests": 15,
+  "modules": {
+    "Autenticación y control de acceso": ["src/utils/validate.js", "src/utils/header.js", "src/redux/slices/authSlice.js", "src/components/PrivateRoute.jsx", "src/pages/Register_Login.jsx"],
+    "Gestión de tareas": ["src/redux/slices/taskSlice.js", "src/hooks/useAddTask.js", "src/hooks/useUpdateTask.js", "src/hooks/useDeleteTask.js", "src/hooks/useAllTask.js", "src/hooks/useAllTaskFilter.js", "src/components/TaskBox.jsx", "src/components/Model.jsx"],
+    "Administración del estado de las tareas": ["src/hooks/useUpdateCategory.js", "src/redux/slices/taskSlice.js", "src/redux/slices/stateSlice.js", "src/components/TaskBox.jsx", "src/components/Model.jsx"],
+    "Asignación de miembros": ["src/hooks/useAddToBoard.js", "src/components/Model.jsx", "src/utils/validate.js", "src/redux/slices/authSlice.js"],
+    "Visor de tareas compartidas": ["src/hooks/useGetTask.js", "src/components/Model.jsx", "src/utils/generateDate.js"]
+  }
+}
