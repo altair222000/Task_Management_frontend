@@ -8,7 +8,11 @@
     "build": "vite build",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "start": "vite preview"
+    "start": "vite preview",
+    "test": "vitest run",
+    "test:unit": "vitest run --coverage",
+    "test:baseline": "node scripts/measure-baseline.cjs",
+    "test:ci": "npm run test:baseline && node scripts/check-critical-coverage.cjs --verify-baseline && vitest run --coverage --reporter=default --reporter=json --outputFile=reports/unit-tests.json && node scripts/check-critical-coverage.cjs"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.2.5",
@@ -20,13 +24,18 @@
     "react-toastify": "^10.0.6"
   },
   "devDependencies": {
+    "@testing-library/dom": "10.4.1",
+    "@testing-library/react": "16.3.0",
     "@types/react": "^18.2.66",
     "@types/react-dom": "^18.2.22",
     "@vitejs/plugin-react": "^4.2.1",
+    "@vitest/coverage-v8": "3.2.6",
     "eslint": "^8.57.0",
     "eslint-plugin-react": "^7.34.1",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.6",
-    "vite": "^5.2.0"
+    "jsdom": "24.1.3",
+    "vite": "^5.2.0",
+    "vitest": "3.2.6"
   }
 }
