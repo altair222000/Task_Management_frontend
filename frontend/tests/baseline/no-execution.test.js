@@ -1,5 +1,5 @@
 import { test, expect } from 'vitest';
-// Instrumentation probe only: zero original application tests, no source imports.
-test('baseline instrumentation does not execute application code', () => {
-  expect(true).toBe(true);
+// Esta prueba auxiliar valida el entorno de Vitest sin importar módulos de la aplicación.
+test('baseline instrumentation runs in the test environment', () => {
+  expect(process.env.NODE_ENV).toBe('test');
 });
