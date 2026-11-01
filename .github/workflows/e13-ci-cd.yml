@@ -182,6 +182,7 @@ jobs:
             -Dsonar.sources=src,scripts
             -Dsonar.tests=tests
             -Dsonar.exclusions=node_modules/**,coverage/**,reports/**,dist/**
+            -Dsonar.coverage.exclusions=scripts/**
             -Dsonar.javascript.lcov.reportPaths=coverage/unit/lcov.info
             -Dsonar.qualitygate.wait=true
             -Dsonar.qualitygate.timeout=300
