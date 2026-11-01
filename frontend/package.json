@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
+    "lint": "eslint src tests scripts vite.config.js vitest.config.js vitest.baseline.config.js --ext .js,.jsx,.cjs --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "start": "vite preview",
     "test": "vitest run",
