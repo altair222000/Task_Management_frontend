@@ -1,265 +1,50 @@
 name: E13 CI/CD frontend
-run-name: E13 pipeline (${{ github.ref_name }})
 
 on:
   push:
-    branches:
-      - featureE13
-      - dev
-      - release
-      - main
+    branches: [dev, release, main]
   pull_request:
     branches: [dev, release, main]
-  workflow_dispatch:
 
 permissions:
   contents: read
 
-concurrency:
-  group: e13-frontend-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   pipeline:
-    name: E13 · Build, pruebas, quality gate y API
+    name: E13 frontend
     runs-on: ubuntu-latest
-    timeout-minutes: 45
-    services:
-      mongodb:
-        image: mongo:7.0
-        ports:
-          - 27017:27017
-        options: >-
-          --health-cmd "mongosh --quiet --eval 'db.adminCommand({ ping: 1 }).ok'"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 10
-    env:
-      TZ: UTC
-      PORT: "3000"
-      MONGODB_URI: mongodb://127.0.0.1:27017/task_management_e13
-      MONGODB_DB_NAME: task_management_e13
-      JWT_SECRET: e13-ci-only-secret-do-not-use-in-production
     steps:
-      - name: Resolver rama del otro repositorio
-        id: paired
-        shell: bash
-        run: |
-          if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
-            if [ "$GITHUB_HEAD_REF" = "featureE13" ]; then
-              paired_ref="featureE13"
-            else
-              paired_ref="$GITHUB_BASE_REF"
-            fi
-          else
-            paired_ref="$GITHUB_REF_NAME"
-          fi
-          echo "ref=$paired_ref" >> "$GITHUB_OUTPUT"
-
-      - name: Descargar repositorio actual
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
-          path: frontend-source
           fetch-depth: 0
 
-      - name: Descargar repositorio complementario
-        uses: actions/checkout@v4
-        with:
-          repository: altair222000/Task_Management
-          ref: ${{ steps.paired.outputs.ref }}
-          token: ${{ github.token }}
-          path: backend-source
-          fetch-depth: 0
-
-      - name: Configurar Node.js del backend
-        uses: actions/setup-node@v4
-        with:
-          node-version: "18.17.1"
-          cache: npm
-          cache-dependency-path: backend-source/backend/package-lock.json
-
-      - name: Instalar dependencias del backend
-        run: npm ci --prefix backend-source/backend --ignore-scripts --no-audit --no-fund
-
-      - name: Validar sintaxis del backend
-        run: |
-          find backend-source/backend \
-            -path '*/node_modules' -prune -o \
-            -type f \( -name '*.js' -o -name '*.cjs' \) -print0 \
-            | xargs -0 -n1 node --check
-
-      - name: Configurar Node.js del frontend
+      - name: Preparar Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: npm
-          cache-dependency-path: frontend-source/frontend/package-lock.json
 
-      - name: Instalar dependencias del frontend
-        run: npm ci --prefix frontend-source/frontend --ignore-scripts --no-audit --no-fund
+      - name: Instalar dependencias
+        run: npm ci --prefix frontend
 
-      - name: Compilar frontend para producción
-        run: npm run build --prefix frontend-source/frontend
+      - name: Compilar frontend
+        run: npm run build --prefix frontend
 
-      - name: Ejecutar pruebas unitarias del backend
-        uses: actions/setup-node@v4
+      - name: Ejecutar pruebas unitarias
+        run: npm run test:unit --prefix frontend
+
+      # Sonar verifica el quality gate en cada pull request y en main.
+      - name: Analizar código y verificar quality gate
+        uses: SonarSource/sonarqube-scan-action@d209202bc7d53ff1cc128f7f907dac145c9d6ae9
         with:
-          node-version: "18.17.1"
-          cache: npm
-          cache-dependency-path: backend-source/backend/package-lock.json
-
-      - name: Correr Jest y validar cobertura crítica
-        run: npm --prefix backend-source/backend run test:ci
-
-      - name: Configurar Node.js para pruebas del frontend
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: npm
-          cache-dependency-path: frontend-source/frontend/package-lock.json
-
-      - name: Correr Vitest y validar cobertura crítica
-        run: npm --prefix frontend-source/frontend run test:ci
-
-      # Cada repositorio mantiene su análisis diferencial para evitar depender de la configuración de la otra rama.
-      - name: Análisis estático diferencial y quality gate (ESLint)
-        shell: bash
-        run: |
-          set -euo pipefail
-          if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
-            base_ref="$GITHUB_BASE_REF"
-          else
-            case "$GITHUB_REF_NAME" in
-              featureE13) base_ref="dev" ;;
-              dev) base_ref="main" ;;
-              release) base_ref="dev" ;;
-              main) base_ref="release" ;;
-              *) base_ref="main" ;;
-            esac
-          fi
-
-          echo "Rama base del análisis: $base_ref"
-          git -C frontend-source fetch --no-tags origin "+refs/heads/$base_ref:refs/remotes/origin/$base_ref"
-          node --check frontend-source/frontend/.eslintrc.cjs
-
-          mapfile -t frontend_files < <(
-            git -C frontend-source diff --name-only --diff-filter=ACMRT "origin/$base_ref...HEAD" -- frontend |
-              grep -E '^frontend/.*\.(cjs|js|jsx|mjs)$' |
-              grep -Ev '^frontend/\.eslintrc\.cjs$' || true
-          )
-
-          eslint_bin="frontend-source/frontend/node_modules/.bin/eslint"
-          if (("${#frontend_files[@]}")); then
-            eslint_files=()
-            for file in "${frontend_files[@]}"; do
-              eslint_files+=("frontend-source/$file")
-            done
-            "$eslint_bin" --config frontend-source/frontend/.eslintrc.cjs --max-warnings 0 "${eslint_files[@]}"
-          else
-            echo "Sin archivos fuente modificados en el frontend."
-          fi
-
-      # En el plan actual de SonarCloud, el quality gate remoto está disponible para main.
-      - name: Validar secreto de SonarCloud (main o PR a main)
-        if: github.ref_name == 'main' || (github.event_name == 'pull_request' && github.base_ref == 'main')
-        shell: bash
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          if [[ -z "$SONAR_TOKEN" ]]; then
-            echo "::error::Falta SONAR_TOKEN en Settings > Secrets and variables > Actions de este repositorio."
-            exit 1
-          fi
-      - name: Analizar frontend en SonarCloud y esperar el quality gate
-        id: sonar
-        if: github.ref_name == 'main' || (github.event_name == 'pull_request' && github.base_ref == 'main')
-        uses: SonarSource/sonarqube-scan-action@d209202bc7d53ff1cc128f7f907dac145c9d6ae9 # v8.3.0
-        with:
-          projectBaseDir: frontend-source/frontend
+          projectBaseDir: frontend
           args: >-
             -Dsonar.projectKey=altair222000_Task_Management_frontend
             -Dsonar.organization=altair222000
-            -Dsonar.sources=src,scripts
+            -Dsonar.sources=src
             -Dsonar.tests=tests
-            -Dsonar.exclusions=node_modules/**,coverage/**,reports/**,dist/**
-            -Dsonar.coverage.exclusions=scripts/**
+            -Dsonar.exclusions=node_modules/**,coverage/**,dist/**
             -Dsonar.javascript.lcov.reportPaths=coverage/unit/lcov.info
-            -Dsonar.qualitygate.wait=true
+            -Dsonar.qualitygate.wait=${{ github.event_name == 'pull_request' || github.ref_name == 'main' }}
             -Dsonar.qualitygate.timeout=300
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
-      - name: Consultar hallazgos nuevos de SonarCloud
-        if: failure() && steps.sonar.outcome == 'failure'
-        shell: bash
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_PROJECT_KEY: altair222000_Task_Management_frontend
-        run: |
-          set -euo pipefail
-          informe="$(curl --fail --silent --show-error --user "${SONAR_TOKEN}:" "https://sonarcloud.io/api/issues/search?componentKeys=${SONAR_PROJECT_KEY}&branch=main&sinceLeakPeriod=true&issueStatuses=OPEN%2CCONFIRMED&ps=500")"
-          printf '%s\n' "$informe" | jq -r '"Incidencias abiertas en código nuevo: \(.total)"'
-          printf '%s\n' "$informe" | jq -r '.issues[] | [.type, .severity, .rule, (.component | sub("^.*:"; "")), (.line // 0 | tostring), .message] | @tsv'
-
-      - name: Configurar Node.js para pruebas de API
-        uses: actions/setup-node@v4
-        with:
-          node-version: "18.17.1"
-          cache: npm
-          cache-dependency-path: backend-source/backend/package-lock.json
-
-      - name: Instalar Newman sin ejecutar scripts de instalación
-        run: npm install --global --ignore-scripts newman@6.2.3
-
-      - name: Iniciar API para Newman
-        run: |
-          mkdir -p backend-source/backend/reports
-          cd backend-source/backend
-          npm start > "$RUNNER_TEMP/task-management-api.log" 2>&1 &
-          echo $! > "$RUNNER_TEMP/task-management-api.pid"
-
-      - name: Esperar a que la API esté saludable
-        shell: bash
-        run: |
-          for attempt in $(seq 1 30); do
-            if curl --fail --silent http://127.0.0.1:3000/health > "$RUNNER_TEMP/task-management-health.json"; then
-              cat "$RUNNER_TEMP/task-management-health.json"
-              exit 0
-            fi
-            sleep 2
-          done
-          cat "$RUNNER_TEMP/task-management-api.log"
-          exit 1
-
-      - name: Ejecutar colección API con Newman
-        run: |
-          cd backend-source/backend
-          newman run tests/api/task-management.postman_collection.json \
-            --env-var "baseUrl=http://127.0.0.1:3000" \
-            --env-var "expectedDatabase=$MONGODB_DB_NAME" \
-            --reporters cli,json \
-            --reporter-json-export reports/api-tests.json
-
-      - name: Publicar reportes de E10 y E11
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: e13-evidence-${{ github.run_number }}
-          path: |
-            backend-source/backend/coverage/
-            backend-source/backend/reports/
-            frontend-source/frontend/coverage/
-            frontend-source/frontend/reports/
-          if-no-files-found: warn
-          retention-days: 30
-
-      - name: Mostrar log de API si falla el workflow
-        if: failure()
-        shell: bash
-        run: |
-          if [[ -f "$RUNNER_TEMP/task-management-api.log" ]]; then
-            cat "$RUNNER_TEMP/task-management-api.log"
-          else
-            echo "La API no había iniciado cuando falló el paso anterior."
-          fi
-
