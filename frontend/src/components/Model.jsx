@@ -96,9 +96,10 @@ export const AddedPeople = () => {
 export const UpdateCategory = () => {
 	const dispatch = useDispatch();
 	const [load, setLoad] = useState("");
-	const { oldCategory, newCategory } = useSelector(
+	// Evita errores si la selección se limpia.
+	const { oldCategory = "", newCategory = "" } = useSelector(
 		(store) => store.state.categoryName
-	);
+	) || {};
 	const taskId = useSelector((store) => store.state.taskMId);
 	const handleUpdateCategory = (e) => {
 		useUpdateCategory(
